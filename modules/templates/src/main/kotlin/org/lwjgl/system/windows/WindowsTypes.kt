@@ -26,8 +26,17 @@ val DWORD = IntegerType("DWORD", PrimitiveMapping.INT)
 val LONG = IntegerType("LONG", PrimitiveMapping.INT)
 val FLOAT = PrimitiveType("FLOAT", PrimitiveMapping.FLOAT)
 
+val ATOM = PrimitiveType("ATOM", PrimitiveMapping.SHORT)
+
 val UINT_p = UINT.p
 val FLOAT_p = FLOAT.p
+
+val UINT_PTR = PrimitiveType("UINT_PTR", PrimitiveMapping.POINTER)
+val LONG_PTR = PrimitiveType("LONG_PTR", PrimitiveMapping.POINTER)
+
+val LRESULT = typedef(LONG_PTR, "LRESULT")
+val WPARAM = typedef(UINT_PTR, "WPARAM")
+val LPARAM = typedef(LONG_PTR, "LPARAM")
 
 val TCHAR = CharType("TCHAR", CharMapping.UTF16)
 
@@ -41,7 +50,9 @@ val LPCTSTR = CharSequenceType(
 val LPCSTR = CharSequenceType("LPCSTR", includesPointer = true)
 val HMODULE = "HMODULE".opaque_p
 val FARPROC = "FARPROC".opaque_p
+val HINSTANCE = "HINSTANCE".opaque_p
 val HWND = "HWND".opaque_p
+val HMENU = "HMENU".opaque_p
 val HDC = "HDC".opaque_p
 val HGLRC = "HGLRC".opaque_p
 val PROC = "PROC".opaque_p
@@ -118,3 +129,39 @@ val PIXELFORMATDESCRIPTOR_STRUCT = struct(WINDOWS_PACKAGE, "PIXELFORMATDESCRIPTO
 val PIXELFORMATDESCRIPTOR = StructType(PIXELFORMATDESCRIPTOR_STRUCT)		
 val LPPIXELFORMATDESCRIPTOR = StructType(name = "LPPIXELFORMATDESCRIPTOR", definition = PIXELFORMATDESCRIPTOR_STRUCT, includesPointer = true)		
 val PIXELFORMATDESCRIPTOR_p = PIXELFORMATDESCRIPTOR.p
+
+val WNDPROC = "WNDPROC".callback(
+		WINDOWS_PACKAGE, LRESULT, "WindowProc",
+		"Will be called for each message sent to the window.",
+		HWND.IN("hwnd", "a handle to the window procedure that received the message"),
+		UINT.IN("uMsg", "the message"),
+		WPARAM.IN("wParam", "additional message information. The content of this parameter depends on the value of the {@code uMsg} parameter."),
+		LPARAM.IN("lParam", "additional message information. The content of this parameter depends on the value of the {@code uMsg} parameter.")
+) {
+	documentation = "An application-defined function that processes messages sent to a window."
+	useSystemCallConvention()
+}
+
+private val HICON = "HICON".opaque_p
+private val HCURSOR = "HCURSOR".opaque_p
+private val HBRUSH = "HBRUSH".opaque_p
+
+private val WNDCLASSEX_STRUCT = struct(WINDOWS_PACKAGE, "WNDCLASSEX") {
+	documentation = "Contains the window class attributes that are registered by the WinUser#RegisterClassEx() function."
+	nativeImport ("WindowsLWJGL.h")
+	UINT.member("cbSize", "size")
+	UINT.member("style")
+	WNDPROC.member("lpfnWndProc", "wndProc")
+	int.member("cbClsExtra", "clsExtra")
+	int.member("cbWndExtra", "wndExtra")
+	HINSTANCE.member("hInstance", "instance")
+	HICON.member("hIcon", "icon")
+	HCURSOR.member("hCursor", "cursor")
+	HBRUSH.member("hbrBackground", "background")
+	LPCTSTR.member("lpszMenuName", "menuName")
+	LPCTSTR.member("lpszClassName", "className")
+	HICON.member("hIconSm", "iconSm")
+}
+
+val WNDCLASSEX = WNDCLASSEX_STRUCT.nativeType
+val WNDCLASSEX_p = WNDCLASSEX.p
